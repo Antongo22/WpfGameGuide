@@ -8,17 +8,27 @@ using System.Windows.Shapes;
 
 namespace WpfApp_Book.Chapters.Chapter7_Graphs.Answers
 {
+    /// <summary>
+    /// Игра-лабиринт - решение задания Главы 7
+    /// Демонстрирует: 2D-массив как карта, BFS поиск пути, визуализация графов
+    /// </summary>
     public partial class MazeAnswer : Page
     {
         private const int CellSize = 30;
         private int mazeWidth = 15;
         private int mazeHeight = 12;
+        
+        // КЛЮЧЕВАЯ СТРУКТУРА: 2D-массив как карта
+        // 0 = проход, 1 = стена
         private int[,] maze = null!;
         
+        // Игрок и выход
         private Point playerPos;
         private Point exitPos;
         private Rectangle playerRect = null!;
         private Rectangle exitRect = null!;
+        
+        // Визуализация BFS-пути
         private List<Rectangle> pathRects = new List<Rectangle>();
         
         private int steps = 0;
@@ -306,3 +316,62 @@ namespace WpfApp_Book.Chapters.Chapter7_Graphs.Answers
         }
     }
 }
+
+/*
+================================================================================
+                           КАК ЭТО РАБОТАЕТ
+================================================================================
+
+КЛЮЧЕВЫЕ КОНЦЕПЦИИ ГЛАВЫ 7:
+---------------------------
+
+1. 2D-МАССИВ КАК КАРТА
+   int[,] maze = new int[height, width];
+   maze[y, x] = 0;  // проход
+   maze[y, x] = 1;  // стена
+   
+   Проверка: можно ли идти?
+   bool CanMove(int x, int y) {
+       return x >= 0 && y >= 0 && x < width && y < height && maze[y,x] != 1;
+   }
+
+2. BFS (BREADTH-FIRST SEARCH) - ПОИСК КРАТЧАЙШЕГО ПУТИ
+   Алгоритм:
+   1. Создаем очередь Queue<Point>
+   2. Добавляем стартовую точку
+   3. Пока очередь не пуста:
+      a) Берем точку из начала очереди
+      b) Если это цель - восстанавливаем путь
+      c) Иначе добавляем соседей в очередь
+   
+   Структуры данных:
+   - Queue<Point> queue - очередь для обхода
+   - Dictionary<Point, Point> cameFrom - откуда пришли
+
+3. ВОССТАНОВЛЕНИЕ ПУТИ
+   После BFS идем от цели к старту по cameFrom:
+   
+   var path = new List<Point>();
+   var current = end;
+   while (cameFrom[current] != current) {
+       path.Add(current);
+       current = cameFrom[current];
+   }
+   path.Reverse();
+
+4. ГЕНЕРАЦИЯ ЛАБИРИНТА
+   Простой способ - случайное заполнение + гарантированный путь:
+   1. Заполняем случайными стенами (30%)
+   2. Прокладываем путь от старта к выходу
+   
+5. 4 НАПРАВЛЕНИЯ ДВИЖЕНИЯ
+   int[] dx = { 0, 0, -1, 1 };  // вверх, вниз, влево, вправо
+   int[] dy = { -1, 1, 0, 0 };
+   
+   for (int i = 0; i < 4; i++) {
+       var next = new Point(current.X + dx[i], current.Y + dy[i]);
+       if (CanMove(next)) { ... }
+   }
+
+================================================================================
+*/

@@ -5,17 +5,24 @@ using System.Windows.Controls;
 
 namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
 {
+    /// <summary>
+    /// Приложение для заметок - решение задания Главы 2
+    /// Демонстрирует: Window, Page, MessageBox, ShowDialog, модальные окна
+    /// </summary>
     public partial class NotesAnswer : Page
     {
+        // ObservableCollection автоматически уведомляет UI об изменениях
         private ObservableCollection<string> notes = new ObservableCollection<string>();
 
         public NotesAnswer()
         {
             InitializeComponent();
+            
+            // Привязываем коллекцию к ListBox
             NotesListBox.ItemsSource = notes;
             
-            // Добавим примеры заметок
-            notes.Add("Первая заметка — пример");
+            // Добавляем примеры
+            notes.Add("Первая заметка - пример");
             notes.Add("Не забыть купить молоко");
             UpdateCount();
         }
@@ -29,6 +36,7 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
             
             if (string.IsNullOrEmpty(text))
             {
+                // MessageBox.Show - простой диалог с сообщением
                 MessageBox.Show("Введите текст заметки!", "Внимание", 
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -51,7 +59,7 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
                 return;
             }
 
-            // Показываем диалог подтверждения
+            // КЛЮЧЕВОЙ МОМЕНТ: Диалог подтверждения с YesNo
             MessageBoxResult result = MessageBox.Show(
                 "Вы уверены, что хотите удалить эту заметку?",
                 "Подтверждение удаления",
@@ -68,7 +76,7 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
         }
 
         /// <summary>
-        /// Редактирование заметки
+        /// Редактирование заметки через модальное окно
         /// </summary>
         private void EditNote_Click(object sender, RoutedEventArgs e)
         {
@@ -79,10 +87,9 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
                 return;
             }
 
-            // Создаём простое диалоговое окно через InputBox-стиль
             string currentText = notes[NotesListBox.SelectedIndex];
             
-            // Используем MessageBox с возможностью ввода через отдельное окно
+            // КЛЮЧЕВОЙ МОМЕНТ: Создание окна программно
             var editWindow = new Window
             {
                 Title = "Редактирование заметки",
@@ -122,7 +129,8 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
             stack.Children.Add(saveBtn);
             editWindow.Content = stack;
             
-            editWindow.ShowDialog(); // Модальное окно!
+            // ShowDialog() - МОДАЛЬНОЕ окно (код ждет закрытия)
+            editWindow.ShowDialog();
         }
 
         /// <summary>
@@ -152,9 +160,6 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
             }
         }
 
-        /// <summary>
-        /// При выборе заметки — показать её содержимое
-        /// </summary>
         private void NotesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (NotesListBox.SelectedItem != null)
@@ -169,3 +174,44 @@ namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
         }
     }
 }
+
+/*
+================================================================================
+                           КАК ЭТО РАБОТАЕТ
+================================================================================
+
+КЛЮЧЕВЫЕ КОНЦЕПЦИИ ГЛАВЫ 2:
+---------------------------
+
+1. OBSERVABLECOLLECTION<T>
+   - Автоматически уведомляет UI об изменениях
+   - При Add(), Remove(), Clear() - ListBox обновится сам
+   - Обычный List<T> НЕ обновляет UI автоматически
+
+2. MESSAGEBOX - ПРОСТЫЕ ДИАЛОГИ
+   Типы кнопок (MessageBoxButton):
+   - OK, OKCancel, YesNo, YesNoCancel
+   
+   Иконки (MessageBoxImage):
+   - Information, Warning, Error, Question
+   
+   Результат (MessageBoxResult):
+   - OK, Cancel, Yes, No, None
+
+3. SHOW() vs SHOWDIALOG()
+   
+   Show() - НЕМОДАЛЬНОЕ окно:
+   - Код продолжает выполняться сразу
+   - Можно переключаться между окнами
+   
+   ShowDialog() - МОДАЛЬНОЕ окно:
+   - Код ЖДЕТ пока окно не закроется
+   - Нельзя переключиться на родительское окно
+
+4. DIALOGRESULT
+   В модальном окне:
+   - this.DialogResult = true;  // Закрыть с "ОК"
+   - this.DialogResult = false; // Закрыть с "Отмена"
+
+================================================================================
+*/

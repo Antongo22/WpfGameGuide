@@ -6,17 +6,24 @@ using System.Windows.Threading;
 
 namespace WpfApp_Book.Chapters.Chapter5_Animation.Answers
 {
+    /// <summary>
+    /// DVD-заставка - решение задания Главы 5
+    /// Демонстрирует: DispatcherTimer, игровой цикл, физика отскока, смена цвета
+    /// </summary>
     public partial class DVDAnswer : Page
     {
+        // Таймер для игрового цикла (~60 FPS)
         private DispatcherTimer gameTimer;
         private Random random = new Random();
         
-        private double velocityX = 3;
-        private double velocityY = 2;
-        private double speed = 5;
+        // Скорость движения (пиксели за кадр)
+        private double velocityX = 3;  // Скорость по X (+ вправо, - влево)
+        private double velocityY = 2;  // Скорость по Y (+ вниз, - вверх)
+        private double speed = 5;      // Базовая скорость
         
-        private int bounceCount = 0;
-        private int cornerHits = 0;
+        // Статистика
+        private int bounceCount = 0;   // Количество отскоков
+        private int cornerHits = 0;    // Попадания в угол (редкость!)
         private bool isRunning = false;
 
         public DVDAnswer()
@@ -182,3 +189,60 @@ namespace WpfApp_Book.Chapters.Chapter5_Animation.Answers
         }
     }
 }
+
+/*
+================================================================================
+                           КАК ЭТО РАБОТАЕТ
+================================================================================
+
+КЛЮЧЕВЫЕ КОНЦЕПЦИИ ГЛАВЫ 5:
+---------------------------
+
+1. ИГРОВОЙ ЦИКЛ (GAME LOOP)
+   - DispatcherTimer с интервалом 16мс = ~60 FPS
+   - Каждый тик: обновляем позицию, проверяем столкновения, перерисовываем
+   
+   gameTimer.Interval = TimeSpan.FromMilliseconds(16);
+   gameTimer.Tick += GameLoop;
+
+2. ФИЗИКА ДВИЖЕНИЯ
+   - Позиция = Позиция + Скорость
+   - x += velocityX;
+   - y += velocityY;
+   
+   velocityX > 0 = движение вправо
+   velocityX < 0 = движение влево
+   velocityY > 0 = движение вниз
+   velocityY < 0 = движение вверх
+
+3. ФИЗИКА ОТСКОКА
+   При столкновении с границей - инвертируем скорость:
+   
+   if (x <= 0 || x + width >= canvasWidth)
+       velocityX = -velocityX;  // Отражение по X
+   
+   if (y <= 0 || y + height >= canvasHeight)
+       velocityY = -velocityY;  // Отражение по Y
+
+4. MATH.SIGN - СОХРАНЕНИЕ НАПРАВЛЕНИЯ
+   Math.Sign(value) возвращает:
+   -1 если value < 0
+    0 если value = 0
+   +1 если value > 0
+   
+   Используется для изменения скорости с сохранением направления:
+   velocityX = Math.Sign(velocityX) * newSpeed;
+
+5. СМЕНА ЦВЕТА
+   Color.FromRgb(red, green, blue) - создание цвета
+   Random для случайных значений:
+   
+   Color newColor = Color.FromRgb(
+       (byte)random.Next(100, 256),
+       (byte)random.Next(100, 256),
+       (byte)random.Next(100, 256)
+   );
+   element.Fill = new SolidColorBrush(newColor);
+
+================================================================================
+*/

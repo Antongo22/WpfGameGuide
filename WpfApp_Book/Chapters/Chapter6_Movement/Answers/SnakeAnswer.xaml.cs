@@ -9,19 +9,29 @@ using System.Windows.Threading;
 
 namespace WpfApp_Book.Chapters.Chapter6_Movement.Answers
 {
+    /// <summary>
+    /// Змейка - решение задания Главы 6
+    /// Демонстрирует: управление клавиатурой, связанные объекты, List для хранения позиций
+    /// </summary>
     public partial class SnakeAnswer : Page
     {
+        // Направление движения змейки
         private enum Direction { Up, Down, Left, Right }
         
-        private const int CellSize = 20;
+        private const int CellSize = 20;  // Размер одной клетки
         private DispatcherTimer gameTimer;
         private Random random = new Random();
         
+        // КЛЮЧЕВАЯ СТРУКТУРА: Змейка как список позиций
+        // snakeBody[0] = голова, snakeBody[n-1] = хвост
         private List<Point> snakeBody = new List<Point>();
-        private List<Rectangle> snakeSegments = new List<Rectangle>();
+        private List<Rectangle> snakeSegments = new List<Rectangle>();  // Визуальные элементы
+        
+        // Направления: текущее и следующее (для плавного поворота)
         private Direction currentDirection = Direction.Right;
         private Direction nextDirection = Direction.Right;
         
+        // Еда
         private Point foodPosition;
         private Ellipse? foodElement;
         
@@ -299,3 +309,57 @@ namespace WpfApp_Book.Chapters.Chapter6_Movement.Answers
         }
     }
 }
+
+/*
+================================================================================
+                           КАК ЭТО РАБОТАЕТ
+================================================================================
+
+КЛЮЧЕВЫЕ КОНЦЕПЦИИ ГЛАВЫ 6:
+---------------------------
+
+1. ЗМЕЙКА КАК СПИСОК ПОЗИЦИЙ
+   List<Point> snakeBody - хранит позиции всех сегментов
+   snakeBody[0] = голова (управляем ей)
+   snakeBody[n-1] = хвост
+   
+   Движение:
+   1. Вычисляем новую позицию головы
+   2. Вставляем в начало списка (Insert(0, newHead))
+   3. Удаляем последний элемент (хвост)
+   
+   Рост при еде:
+   - Просто НЕ удаляем хвост
+
+2. НАПРАВЛЕНИЕ И ПРЕДОТВРАЩЕНИЕ РАЗВОРОТА
+   Нельзя развернуться на 180 градусов:
+   
+   if (currentDirection != Direction.Down)
+       nextDirection = Direction.Up;
+   
+   currentDirection - текущее направление (применяется в GameLoop)
+   nextDirection - буферизированное (применяется при следующем тике)
+
+3. SWITCH-ВЫРАЖЕНИЕ (C# 8+)
+   Point newHead = currentDirection switch
+   {
+       Direction.Up => new Point(head.X, head.Y - CellSize),
+       Direction.Down => new Point(head.X, head.Y + CellSize),
+       _ => head  // default
+   };
+
+4. ПРОВЕРКА СТОЛКНОВЕНИЙ
+   Со стеной:
+   if (x < 0 || y < 0 || x >= width || y >= height)
+   
+   С собой:
+   if (snakeBody.Contains(newHead))
+
+5. РАНДОМНАЯ ПОЗИЦИЯ ЕДЫ
+   Генерируем позицию, не занятую змейкой:
+   do {
+       newPos = new Point(random.Next(width), random.Next(height));
+   } while (snakeBody.Contains(newPos));
+
+================================================================================
+*/

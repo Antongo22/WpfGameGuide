@@ -8,15 +8,21 @@ using System.Windows.Shapes;
 
 namespace WpfApp_Book.Chapters.Chapter4_Layout.Answers
 {
+    /// <summary>
+    /// Drag-Drop редактор - решение задания Главы 4
+    /// Демонстрирует: Canvas, координаты, CaptureMouse, расчет расстояния, AABB collision
+    /// </summary>
     public partial class DragDropAnswer : Page
     {
+        // Списки для хранения всех фигур и их свойств
         private List<Rectangle> shapes = new List<Rectangle>();
-        private List<Point> initialPositions = new List<Point>();
-        private List<SolidColorBrush> originalColors = new List<SolidColorBrush>();
+        private List<Point> initialPositions = new List<Point>();       // Начальные позиции для сброса
+        private List<SolidColorBrush> originalColors = new List<SolidColorBrush>();  // Оригинальные цвета
         
-        private Rectangle? draggedShape = null;
-        private Point clickOffset;
-        private bool isDragging = false;
+        // Состояние перетаскивания
+        private Rectangle? draggedShape = null;  // Текущая перетаскиваемая фигура
+        private Point clickOffset;               // Смещение клика от угла фигуры
+        private bool isDragging = false;         // Флаг: идет ли перетаскивание
 
         // Цвета фигур
         private static readonly Color[] shapeColors = 
@@ -224,3 +230,61 @@ namespace WpfApp_Book.Chapters.Chapter4_Layout.Answers
         }
     }
 }
+
+/*
+================================================================================
+                           КАК ЭТО РАБОТАЕТ
+================================================================================
+
+КЛЮЧЕВЫЕ КОНЦЕПЦИИ ГЛАВЫ 4:
+---------------------------
+
+1. CANVAS - АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ
+   - Canvas.SetLeft(element, x) - установить X-координату
+   - Canvas.SetTop(element, y) - установить Y-координату
+   - Canvas.GetLeft(element) - получить X-координату
+   - Canvas.GetTop(element) - получить Y-координату
+
+2. DRAG-AND-DROP АЛГОРИТМ
+   MouseDown:
+   - Запоминаем перетаскиваемый объект
+   - Запоминаем смещение клика от угла объекта
+   - CaptureMouse() - захватываем мышь
+   
+   MouseMove:
+   - Получаем позицию мыши относительно Canvas
+   - Вычисляем новую позицию = мышь - смещение
+   - Ограничиваем границами Canvas (Math.Clamp)
+   - Устанавливаем новую позицию
+   
+   MouseUp:
+   - ReleaseMouseCapture() - отпускаем мышь
+   - Сбрасываем состояние
+
+3. CAPTUREMOUSE / RELEASEMOUSECAPTURE
+   - CaptureMouse() - все события мыши идут к этому элементу
+   - Даже если мышь выходит за пределы элемента
+   - ReleaseMouseCapture() - возвращает нормальное поведение
+
+4. РАСЧЕТ РАССТОЯНИЯ (ТЕОРЕМА ПИФАГОРА)
+   distance = sqrt((x2-x1)^2 + (y2-y1)^2)
+   
+   В C#:
+   double dist = Math.Sqrt(Math.Pow(x2-x1, 2) + Math.Pow(y2-y1, 2));
+
+5. AABB COLLISION DETECTION (столкновение прямоугольников)
+   Два прямоугольника пересекаются если:
+   - A.Left < B.Right AND A.Right > B.Left
+   - A.Top < B.Bottom AND A.Bottom > B.Top
+   
+   В коде:
+   ax < bx + b.Width && ax + a.Width > bx &&
+   ay < by + b.Height && ay + a.Height > by
+
+6. PANEL.SETZINDEX
+   - Устанавливает порядок отрисовки
+   - Больше значение = выше (поверх других)
+   - Panel.SetZIndex(element, 100) - поднять наверх
+
+================================================================================
+*/
