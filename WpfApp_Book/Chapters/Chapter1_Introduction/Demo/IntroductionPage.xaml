@@ -1,0 +1,171 @@
+<Page x:Class="WpfApp_Book.Chapters.Chapter1_Introduction.Demo.IntroductionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Глава 1: Введение">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <StackPanel>
+            <!-- ===== ЗАГОЛОВОК ===== -->
+            <TextBlock Text="Глава 1: Введение. Знакомство с компонентами" 
+                       FontSize="28" FontWeight="Bold" Margin="0,0,0,20"
+                       Foreground="#2E86AB"/>
+            
+            <!-- ===== ТЕОРИЯ: BUTTON ===== -->
+            <Border Background="#F0F4F8" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🔘 Button (Кнопка)" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        Button — это элемент управления, который реагирует на нажатие.
+                        Основные свойства:
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="10,5,0,0" FontSize="13" FontFamily="Consolas">
+                        • Content — текст или содержимое кнопки&#x0a;
+                        • Width, Height — размеры&#x0a;
+                        • Margin — внешние отступы (лево, верх, право, низ)&#x0a;
+                        • IsEnabled — активна ли кнопка&#x0a;
+                        • Click — событие при нажатии
+                    </TextBlock>
+                    
+                    <!-- Демонстрация Button -->
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Обычная кнопка" Margin="0,0,10,0" Padding="10,5"/>
+                        <Button Content="Неактивная" IsEnabled="False" Margin="0,0,10,0" Padding="10,5"/>
+                        <Button Padding="10,5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⭐" Margin="0,0,5,0"/>
+                                <TextBlock Text="С иконкой"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== ТЕОРИЯ: TEXTBLOCK vs LABEL ===== -->
+            <Border Background="#F0F4F8" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="📝 TextBlock vs Label" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        TextBlock — для отображения текста. Лёгкий, быстрый.&#x0a;
+                        Label — обёртка над TextBlock с дополнительными возможностями (Target, AccessKey).
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="10,5,0,0" FontSize="13" FontFamily="Consolas">
+                        TextBlock:&#x0a;
+                        • Text — текст для отображения&#x0a;
+                        • FontSize — размер шрифта&#x0a;
+                        • FontWeight — жирность (Normal, Bold)&#x0a;
+                        • Foreground — цвет текста&#x0a;
+                        • TextWrapping — перенос строк (NoWrap, Wrap)
+                    </TextBlock>
+                    
+                    <!-- Демонстрация TextBlock -->
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Обычный TextBlock" FontSize="14"/>
+                        <TextBlock Text="Жирный текст" FontWeight="Bold" FontSize="14"/>
+                        <TextBlock Text="Цветной текст" Foreground="DarkBlue" FontSize="14"/>
+                        <TextBlock Text="Это очень длинный текст, который будет переноситься на следующую строку благодаря свойству TextWrapping=Wrap" 
+                                   TextWrapping="Wrap" FontSize="14" Width="300" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== ТЕОРИЯ: TEXTBOX ===== -->
+            <Border Background="#F0F4F8" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="⌨️ TextBox (Поле ввода)" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        TextBox — поле для ввода текста пользователем.
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="10,5,0,0" FontSize="13" FontFamily="Consolas">
+                        • Text — введённый текст (можно читать и устанавливать)&#x0a;
+                        • IsReadOnly — только для чтения&#x0a;
+                        • MaxLength — максимальное количество символов&#x0a;
+                        • TextChanged — событие при изменении текста
+                    </TextBlock>
+                    
+                    <!-- Демонстрация TextBox -->
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBox x:Name="DemoTextBox" Width="300" HorizontalAlignment="Left" 
+                                 Margin="0,0,0,5" TextChanged="DemoTextBox_TextChanged"/>
+                        <TextBlock x:Name="TextBoxPreview" Text="Вы ввели: " FontSize="13" Foreground="Gray"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== ТЕОРИЯ: СОБЫТИЯ ===== -->
+            <Border Background="#E8F6F3" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="⚡ События (Events)" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        Событие — это способ реагировать на действия пользователя.&#x0a;
+                        В XAML указываем имя события и метод-обработчик:
+                    </TextBlock>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="12">
+                            &lt;Button Content="Нажми" Click="Button_Click"/&gt;
+                        </TextBlock>
+                    </Border>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        В C# коде (файл .xaml.cs) создаём метод:
+                    </TextBlock>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="12">
+                            private void Button_Click(object sender, RoutedEventArgs e)&#x0a;{&#x0a;    // sender — кнопка, которая вызвала событие&#x0a;    // Здесь пишем код, который выполнится при нажатии&#x0a;}
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== ПРИМЕР: КЛИКЕР ===== -->
+            <Border Background="#FEF9E7" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🎮 Пример: Кликер" FontSize="18" FontWeight="Bold" Foreground="#B7950B"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        Простой кликер — нажимаем кнопку, счётчик увеличивается:
+                    </TextBlock>
+                    
+                    <StackPanel HorizontalAlignment="Center" Margin="0,15,0,0">
+                        <TextBlock x:Name="ClickCountText" Text="Кликов: 0" 
+                                   FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
+                                   Foreground="#2E86AB"/>
+                        <Button x:Name="ClickerButton" Content="КЛИК!" 
+                                Width="150" Height="60" FontSize="20" FontWeight="Bold"
+                                Margin="0,10,0,0" Click="ClickerButton_Click"
+                                Background="#3498DB" Foreground="White"/>
+                        <Button Content="Сбросить" Width="100" Margin="0,10,0,0" 
+                                Click="ResetButton_Click"/>
+                    </StackPanel>
+                    
+                    <TextBlock TextWrapping="Wrap" Margin="0,15,0,0" FontSize="13" Foreground="#666">
+                        Как это работает:&#x0a;
+                        1. В классе храним переменную int clickCount = 0&#x0a;
+                        2. При нажатии увеличиваем: clickCount++&#x0a;
+                        3. Обновляем текст: ClickCountText.Text = $"Кликов: {clickCount}"
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== ПРАКТИЧЕСКОЕ ЗАДАНИЕ ===== -->
+            <Border Background="#FADBD8" CornerRadius="8" Padding="15" Margin="0,0,0,15" 
+                    BorderBrush="#E74C3C" BorderThickness="2">
+                <StackPanel>
+                    <TextBlock Text="📋 Практическое задание: Калькулятор" 
+                               FontSize="18" FontWeight="Bold" Foreground="#C0392B"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        Создайте простой калькулятор с операциями +, -, *, /
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="13">
+                        Требования:&#x0a;
+                        • Два поля TextBox для ввода чисел&#x0a;
+                        • Четыре кнопки для операций (+, -, *, /)&#x0a;
+                        • TextBlock для отображения результата&#x0a;
+                        • Обработка деления на ноль (показать сообщение об ошибке)
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="13" FontStyle="Italic" Foreground="#666">
+                        Подсказка: используйте int.Parse(textBox.Text) или double.Parse() для преобразования текста в число.
+                        Для проверки корректности ввода используйте int.TryParse().
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

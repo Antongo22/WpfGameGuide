@@ -1,0 +1,75 @@
+<Page x:Class="WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Demo.PagesAndWindowsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Глава 2: Страницы и окна">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <StackPanel>
+            <TextBlock Text="Глава 2: Страницы, вкладки и окна" 
+                       FontSize="28" FontWeight="Bold" Margin="0,0,0,20"
+                       Foreground="#2E86AB"/>
+            
+            <Border Background="#F0F4F8" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🪟 Window vs Page" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        Window — отдельное окно с заголовком.&#x0a;
+                        Page — страница внутри Frame или NavigationWindow.
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#E8F6F3" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🚪 Открытие окон" FontSize="18" FontWeight="Bold" Foreground="#1A5276"/>
+                    <TextBlock Text="Show() — обычное окно" FontWeight="Bold" Margin="0,10,0,5"/>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,5,0,10">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="12">
+                            var window = new MyWindow();&#x0a;window.Show();
+                        </TextBlock>
+                    </Border>
+                    
+                    <TextBlock Text="ShowDialog() — модальное окно" FontWeight="Bold" Margin="0,5,0,5"/>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,5,0,10">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="12">
+                            var dialog = new MyDialog();&#x0a;bool? result = dialog.ShowDialog();
+                        </TextBlock>
+                    </Border>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Открыть окно" Padding="10,5" Margin="0,0,10,0" Click="OpenWindow_Click"/>
+                        <Button Content="Модальное окно" Padding="10,5" Click="OpenDialog_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#FEF9E7" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="💬 MessageBox" FontSize="18" FontWeight="Bold" Foreground="#B7950B"/>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,10,0,10">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="12">
+                            MessageBoxResult result = MessageBox.Show(&#x0a;    "Удалить?", "Подтверждение",&#x0a;    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        </TextBlock>
+                    </Border>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Сообщение" Padding="10,5" Margin="0,0,10,0" Click="ShowMessage_Click"/>
+                        <Button Content="Да/Нет" Padding="10,5" Click="ShowYesNo_Click"/>
+                    </StackPanel>
+                    <TextBlock x:Name="MessageBoxResult" Text="" Margin="0,10,0,0" FontWeight="Bold" Foreground="#2E86AB"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#FADBD8" CornerRadius="8" Padding="15" BorderBrush="#E74C3C" BorderThickness="2">
+                <StackPanel>
+                    <TextBlock Text="📋 Задание: Приложение-заметки" FontSize="18" FontWeight="Bold" Foreground="#C0392B"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="13">
+                        • ListBox для списка заметок&#x0a;
+                        • TextBox для ввода&#x0a;
+                        • Кнопка "Удалить" с подтверждением через MessageBox
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

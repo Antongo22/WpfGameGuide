@@ -1,0 +1,46 @@
+<Page x:Class="WpfApp_Book.Chapters.Chapter6_Movement.Demo.MovementPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Глава 6: Управление" Focusable="True" Loaded="Page_Loaded" Unloaded="Page_Unloaded" KeyDown="Page_KeyDown">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Margin="20,20,20,10">
+            <TextBlock Text="Глава 6: Управление + Присоединение объектов" FontSize="26" FontWeight="Bold" Foreground="#2E86AB"/>
+            
+            <Border Background="#F0F4F8" CornerRadius="8" Padding="15" Margin="0,15,0,0">
+                <StackPanel>
+                    <TextBlock Text="🐍 Змейка: тело следует за головой" FontSize="16" FontWeight="Bold"/>
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                        <TextBlock FontFamily="Consolas" Foreground="White" FontSize="11">
+                            snakeBody.Insert(0, newHead);  // Новая голова&#x0a;snakeBody.RemoveAt(snakeBody.Count - 1);  // Удаляем хвост
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        
+        <Border Grid.Row="1" Background="#2C3E50" Margin="20,0,20,20" CornerRadius="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="🐍 Мини-Змейка (стрелки)" FontSize="16" FontWeight="Bold" Foreground="White" Margin="10"/>
+                <Canvas x:Name="GameCanvas" Grid.Row="1" Background="#1A252F" ClipToBounds="True"/>
+                
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
+                    <Button x:Name="StartButton" Content="▶ Старт" Width="80" Click="Start_Click"/>
+                    <Button Content="↻ Заново" Width="80" Margin="10,0" Click="Reset_Click"/>
+                    <TextBlock x:Name="ScoreText" Text="Счёт: 0" Foreground="White" VerticalAlignment="Center" FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>
