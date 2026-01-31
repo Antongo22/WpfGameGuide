@@ -11,51 +11,113 @@ namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
 {
     public partial class PacManAnswer : Page
     {
+        #region Constants
+        private const int CellSize = 19;
+        private const int MapWidth = 28;
+        private const int MapHeight = 31;
+        #endregion
+
+        #region Game State
         private enum Direction { None, Up, Down, Left, Right }
+        private enum GameState { Ready, Playing, Paused, Dying, GameOver, Win }
         
-        private const int CellSize = 24;
-        private int mapWidth = 19;
-        private int mapHeight = 15;
-        
-        // 0 = путь, 1 = стена, 2 = точка, 3 = power-up
-        private int[,] map = null!;
-        
-        private DispatcherTimer gameTimer = null!;
-        private DispatcherTimer ghostTimer = null!;
-        private Random random = new Random();
-        
-        // Pac-Man
+        private GameState gameState = GameState.Ready;
+        private int score = 0;
+        private int highScore = 0;
+        private int lives = 3;
+        private int level = 1;
+        private int dotsCollected = 0;
+        private int totalDots = 0;
+        #endregion
+
+        #region Pac-Man
         private Point pacmanPos;
+        private Point pacmanStartPos;
         private Direction pacmanDir = Direction.None;
         private Direction nextDir = Direction.None;
-        private Ellipse pacmanElement = null!;
+        private Path? pacmanElement;
+        private bool mouthOpen = true;
+        private int animationTick = 0;
+        #endregion
+
+        #region Ghosts
+        private class Ghost
+        {
+            public Point Position;
+            public Point StartPosition;
+            public Direction Direction;
+            public Ellipse? Element;
+            public Ellipse? Eyes;
+            public Color NormalColor;
+            public bool IsScared;
+            public bool IsEaten;
+            public int ScatterTicks;
+        }
         
-        // Призраки
-        private List<Point> ghostPositions = new List<Point>();
-        private List<Ellipse> ghostElements = new List<Ellipse>();
-        private Color[] ghostColors = { Colors.Red, Colors.Cyan, Colors.Pink, Colors.Orange };
-        
-        // Точки
+        private List<Ghost> ghosts = new List<Ghost>();
+        private bool powerMode = false;
+        private int powerModeTicks = 0;
+        private const int PowerModeDuration = 80;
+        #endregion
+
+        #region Map
+        // 0=empty, 1=wall, 2=dot, 3=power, 4=ghost house, 5=tunnel
+        private int[,] map = null!;
+        private int[,] originalMap = null!;
+        private Rectangle[,] mapCells = null!;
         private List<Ellipse> dotElements = new List<Ellipse>();
-        private int totalDots = 0;
-        private int collectedDots = 0;
-        
-        // Состояние игры
-        private int score = 0;
-        private int lives = 3;
-        private bool isRunning = false;
-        private bool isPoweredUp = false;
-        private int powerUpTicks = 0;
+        #endregion
+
+        #region Timers
+        private DispatcherTimer gameTimer = null!;
+        private DispatcherTimer animationTimer = null!;
+        private Random random = new Random();
+        #endregion
+
+        // Классическая карта Pac-Man
+        private static readonly string[] MapTemplate = {
+            "1111111111111111111111111111",
+            "1222222222222112222222222221",
+            "1211112111112112111112111121",
+            "1311112111112112111112111131",
+            "1211112111112112111112111121",
+            "1222222222222222222222222221",
+            "1211112112111111112112111121",
+            "1211112112111111112112111121",
+            "1222222112222112222112222221",
+            "1111112111110110111112111111",
+            "0000012111110110111112100000",
+            "0000012110000000000112100000",
+            "0000012110111441110112100000",
+            "1111112110100000010112111111",
+            "5000002000100000010002000005",
+            "1111112110100000010112111111",
+            "0000012110111111110112100000",
+            "0000012110000000000112100000",
+            "0000012110111111110112100000",
+            "1111112110111111110112111111",
+            "1222222222222112222222222221",
+            "1211112111112112111112111121",
+            "1211112111112112111112111121",
+            "1322112222222002222222112231",
+            "1112112112111111112112112111",
+            "1112112112111111112112112111",
+            "1222222112222112222112222221",
+            "1211111111112112111111111121",
+            "1211111111112112111111111121",
+            "1222222222222222222222222221",
+            "1111111111111111111111111111"
+        };
 
         public PacManAnswer()
         {
             InitializeComponent();
             
-            gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
             gameTimer.Tick += GameLoop;
             
-            ghostTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-            ghostTimer.Tick += MoveGhosts;
+            animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            animationTimer.Tick += AnimationLoop;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -67,134 +129,104 @@ namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             gameTimer.Stop();
-            ghostTimer.Stop();
+            animationTimer.Stop();
         }
 
-        /// <summary>
-        /// Инициализация игры
-        /// </summary>
+        #region Game Initialization
         private void InitGame()
         {
             gameTimer.Stop();
-            ghostTimer.Stop();
-            isRunning = false;
+            animationTimer.Stop();
             
             GameCanvas.Children.Clear();
             dotElements.Clear();
-            ghostElements.Clear();
-            ghostPositions.Clear();
+            ghosts.Clear();
             
+            gameState = GameState.Ready;
             score = 0;
             lives = 3;
-            collectedDots = 0;
-            isPoweredUp = false;
+            level = 1;
+            dotsCollected = 0;
+            powerMode = false;
             pacmanDir = Direction.None;
             nextDir = Direction.None;
             
-            ScoreText.Text = "0";
-            LivesText.Text = "❤❤❤";
-            StatusText.Text = "Нажмите СТАРТ!";
-            StartButton.Content = "▶ СТАРТ";
-            
+            UpdateUI();
             CreateMap();
             DrawMap();
             SpawnPacman();
             SpawnGhosts();
+            UpdateLivesDisplay();
+            
+            StatusText.Text = "PRESS SPACE TO START";
         }
 
-        /// <summary>
-        /// Создание карты лабиринта
-        /// </summary>
         private void CreateMap()
         {
-            map = new int[mapHeight, mapWidth];
-            
-            // Базовый шаблон лабиринта
-            string[] template = {
-                "1111111111111111111",
-                "1222222121222212221",
-                "1211121121211211211",
-                "1222222222222222221",
-                "1211111211211111211",
-                "1222221222222122221",
-                "1111121111111211111",
-                "0000121222222120000",
-                "1111121211112121111",
-                "1222222212212222221",
-                "1211111211211111211",
-                "1212222222222222121",
-                "1211211111111121211",
-                "1222212222222212221",
-                "1111111111111111111"
-            };
-            
+            map = new int[MapHeight, MapWidth];
+            originalMap = new int[MapHeight, MapWidth];
             totalDots = 0;
-            for (int y = 0; y < mapHeight && y < template.Length; y++)
-            {
-                for (int x = 0; x < mapWidth && x < template[y].Length; x++)
-                {
-                    map[y, x] = template[y][x] - '0';
-                    if (map[y, x] == 2) totalDots++;
-                }
-            }
             
-            // Добавляем power-up'ы в углах
-            if (mapHeight > 2 && mapWidth > 2)
+            for (int y = 0; y < MapHeight; y++)
             {
-                map[1, 1] = 3;
-                map[1, mapWidth - 2] = 3;
-                map[mapHeight - 2, 1] = 3;
-                map[mapHeight - 2, mapWidth - 2] = 3;
+                for (int x = 0; x < MapWidth; x++)
+                {
+                    int cell = MapTemplate[y][x] - '0';
+                    map[y, x] = cell;
+                    originalMap[y, x] = cell;
+                    if (cell == 2 || cell == 3) totalDots++;
+                }
             }
         }
 
-        /// <summary>
-        /// Отрисовка карты
-        /// </summary>
         private void DrawMap()
         {
-            for (int y = 0; y < mapHeight; y++)
+            mapCells = new Rectangle[MapHeight, MapWidth];
+            
+            for (int y = 0; y < MapHeight; y++)
             {
-                for (int x = 0; x < mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
-                    if (map[y, x] == 1)
+                    int cell = map[y, x];
+                    
+                    if (cell == 1) // Стена
                     {
-                        // Стена
                         var wall = new Rectangle
                         {
                             Width = CellSize,
                             Height = CellSize,
-                            Fill = new SolidColorBrush(Color.FromRgb(33, 33, 222))
+                            Fill = new SolidColorBrush(Color.FromRgb(33, 33, 255)),
+                            Stroke = new SolidColorBrush(Color.FromRgb(0, 0, 139)),
+                            StrokeThickness = 1
                         };
                         Canvas.SetLeft(wall, x * CellSize);
                         Canvas.SetTop(wall, y * CellSize);
                         GameCanvas.Children.Add(wall);
+                        mapCells[y, x] = wall;
                     }
-                    else if (map[y, x] == 2)
+                    else if (cell == 2) // Точка
                     {
-                        // Точка
                         var dot = new Ellipse
                         {
-                            Width = 6,
-                            Height = 6,
-                            Fill = Brushes.White
+                            Width = 4,
+                            Height = 4,
+                            Fill = new SolidColorBrush(Color.FromRgb(255, 184, 151))
                         };
-                        Canvas.SetLeft(dot, x * CellSize + CellSize / 2 - 3);
-                        Canvas.SetTop(dot, y * CellSize + CellSize / 2 - 3);
+                        Canvas.SetLeft(dot, x * CellSize + CellSize / 2 - 2);
+                        Canvas.SetTop(dot, y * CellSize + CellSize / 2 - 2);
                         GameCanvas.Children.Add(dot);
                         dotElements.Add(dot);
                     }
-                    else if (map[y, x] == 3)
+                    else if (cell == 3) // Power pellet
                     {
-                        // Power-up
                         var power = new Ellipse
                         {
-                            Width = 14,
-                            Height = 14,
-                            Fill = Brushes.White
+                            Width = 12,
+                            Height = 12,
+                            Fill = new SolidColorBrush(Color.FromRgb(255, 184, 151))
                         };
-                        Canvas.SetLeft(power, x * CellSize + CellSize / 2 - 7);
-                        Canvas.SetTop(power, y * CellSize + CellSize / 2 - 7);
+                        Canvas.SetLeft(power, x * CellSize + CellSize / 2 - 6);
+                        Canvas.SetTop(power, y * CellSize + CellSize / 2 - 6);
                         GameCanvas.Children.Add(power);
                         dotElements.Add(power);
                     }
@@ -204,45 +236,561 @@ namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
 
         private void SpawnPacman()
         {
-            pacmanPos = new Point(9, 7);
+            pacmanStartPos = new Point(14, 23);
+            pacmanPos = pacmanStartPos;
+            pacmanDir = Direction.None;
+            nextDir = Direction.None;
             
-            pacmanElement = new Ellipse
-            {
-                Width = CellSize - 4,
-                Height = CellSize - 4,
-                Fill = Brushes.Yellow
-            };
-            Canvas.SetLeft(pacmanElement, pacmanPos.X * CellSize + 2);
-            Canvas.SetTop(pacmanElement, pacmanPos.Y * CellSize + 2);
+            // Создаём Pac-Man как Path (для анимации рта)
+            pacmanElement = CreatePacmanShape();
+            Canvas.SetLeft(pacmanElement, pacmanPos.X * CellSize);
+            Canvas.SetTop(pacmanElement, pacmanPos.Y * CellSize);
             GameCanvas.Children.Add(pacmanElement);
+        }
+
+        private Path CreatePacmanShape()
+        {
+            var path = new Path
+            {
+                Fill = Brushes.Yellow,
+                Width = CellSize,
+                Height = CellSize
+            };
+            UpdatePacmanMouth(path, mouthOpen);
+            return path;
+        }
+
+        private void UpdatePacmanMouth(Path path, bool open)
+        {
+            double size = CellSize;
+            double center = size / 2;
+            double radius = size / 2 - 1;
+            
+            // Угол рта в зависимости от направления
+            double startAngle = pacmanDir switch
+            {
+                Direction.Right => open ? 35 : 5,
+                Direction.Left => open ? 215 : 185,
+                Direction.Up => open ? 305 : 275,
+                Direction.Down => open ? 125 : 95,
+                _ => open ? 35 : 5
+            };
+            
+            double sweepAngle = open ? 290 : 350;
+            
+            var geometry = new StreamGeometry();
+            using (var ctx = geometry.Open())
+            {
+                double startRad = startAngle * Math.PI / 180;
+                double endRad = (startAngle + sweepAngle) * Math.PI / 180;
+                
+                Point startPoint = new Point(
+                    center + radius * Math.Cos(startRad),
+                    center + radius * Math.Sin(startRad)
+                );
+                Point endPoint = new Point(
+                    center + radius * Math.Cos(endRad),
+                    center + radius * Math.Sin(endRad)
+                );
+                
+                ctx.BeginFigure(new Point(center, center), true, true);
+                ctx.LineTo(startPoint, true, false);
+                ctx.ArcTo(endPoint, new Size(radius, radius), 0, sweepAngle > 180, SweepDirection.Clockwise, true, false);
+            }
+            geometry.Freeze();
+            path.Data = geometry;
         }
 
         private void SpawnGhosts()
         {
-            Point[] ghostStarts = { new Point(8, 7), new Point(9, 6), new Point(10, 7), new Point(9, 8) };
-            
-            for (int i = 0; i < 4; i++)
+            var ghostData = new[]
             {
-                var ghost = new Ellipse
+                (new Point(13, 11), Color.FromRgb(255, 0, 0)),     // Blinky (Red)
+                (new Point(14, 14), Color.FromRgb(255, 184, 255)), // Pinky (Pink)
+                (new Point(13, 14), Color.FromRgb(0, 255, 255)),   // Inky (Cyan)
+                (new Point(14, 11), Color.FromRgb(255, 184, 82))   // Clyde (Orange)
+            };
+
+            foreach (var (pos, color) in ghostData)
+            {
+                var ghost = new Ghost
                 {
-                    Width = CellSize - 4,
-                    Height = CellSize - 4,
-                    Fill = new SolidColorBrush(ghostColors[i])
+                    Position = pos,
+                    StartPosition = pos,
+                    Direction = Direction.Up,
+                    NormalColor = color,
+                    IsScared = false,
+                    IsEaten = false
+                };
+
+                // Тело призрака
+                ghost.Element = new Ellipse
+                {
+                    Width = CellSize - 2,
+                    Height = CellSize - 2,
+                    Fill = new SolidColorBrush(color)
                 };
                 
-                Point pos = ghostStarts[i];
-                ghostPositions.Add(pos);
-                ghostElements.Add(ghost);
+                // Глаза
+                ghost.Eyes = new Ellipse
+                {
+                    Width = 6,
+                    Height = 6,
+                    Fill = Brushes.White
+                };
+
+                Canvas.SetLeft(ghost.Element, pos.X * CellSize + 1);
+                Canvas.SetTop(ghost.Element, pos.Y * CellSize + 1);
+                Canvas.SetLeft(ghost.Eyes, pos.X * CellSize + CellSize / 2 - 3);
+                Canvas.SetTop(ghost.Eyes, pos.Y * CellSize + 4);
                 
-                Canvas.SetLeft(ghost, pos.X * CellSize + 2);
-                Canvas.SetTop(ghost, pos.Y * CellSize + 2);
-                GameCanvas.Children.Add(ghost);
+                GameCanvas.Children.Add(ghost.Element);
+                GameCanvas.Children.Add(ghost.Eyes);
+                ghosts.Add(ghost);
+            }
+        }
+        #endregion
+
+        #region Game Loop
+        private void GameLoop(object? sender, EventArgs e)
+        {
+            if (gameState != GameState.Playing) return;
+
+            // Power mode countdown
+            if (powerMode)
+            {
+                powerModeTicks--;
+                if (powerModeTicks <= 0)
+                {
+                    EndPowerMode();
+                }
+                else if (powerModeTicks <= 20)
+                {
+                    // Мигание перед окончанием
+                    foreach (var ghost in ghosts)
+                    {
+                        if (ghost.IsScared && !ghost.IsEaten)
+                        {
+                            ghost.Element!.Fill = (powerModeTicks % 4 < 2) 
+                                ? Brushes.Blue 
+                                : Brushes.White;
+                        }
+                    }
+                }
+            }
+
+            MovePacman();
+            MoveGhosts();
+            CheckCollisions();
+        }
+
+        private void AnimationLoop(object? sender, EventArgs e)
+        {
+            if (gameState != GameState.Playing) return;
+            
+            animationTick++;
+            if (animationTick % 2 == 0 && pacmanDir != Direction.None)
+            {
+                mouthOpen = !mouthOpen;
+                if (pacmanElement != null)
+                {
+                    UpdatePacmanMouth(pacmanElement, mouthOpen);
+                }
             }
         }
 
-        /// <summary>
-        /// Обработка клавиатуры
-        /// </summary>
+        private void MovePacman()
+        {
+            // Пробуем применить следующее направление
+            if (nextDir != Direction.None)
+            {
+                Point nextPos = GetNextPosition(pacmanPos, nextDir);
+                if (CanMove(nextPos))
+                {
+                    pacmanDir = nextDir;
+                }
+            }
+
+            if (pacmanDir == Direction.None) return;
+
+            Point newPos = GetNextPosition(pacmanPos, pacmanDir);
+            
+            // Туннель
+            if (newPos.X < 0) newPos.X = MapWidth - 1;
+            else if (newPos.X >= MapWidth) newPos.X = 0;
+            
+            if (CanMove(newPos))
+            {
+                pacmanPos = newPos;
+                Canvas.SetLeft(pacmanElement!, pacmanPos.X * CellSize);
+                Canvas.SetTop(pacmanElement!, pacmanPos.Y * CellSize);
+                
+                CollectDot();
+            }
+        }
+
+        private void MoveGhosts()
+        {
+            foreach (var ghost in ghosts)
+            {
+                if (ghost.IsEaten)
+                {
+                    // Возвращаемся в дом
+                    MoveTowardsTarget(ghost, ghost.StartPosition);
+                    if (ghost.Position == ghost.StartPosition)
+                    {
+                        ghost.IsEaten = false;
+                        ghost.IsScared = false;
+                        ghost.Element!.Fill = new SolidColorBrush(ghost.NormalColor);
+                        ghost.Eyes!.Fill = Brushes.White;
+                    }
+                }
+                else if (ghost.IsScared)
+                {
+                    // Случайное движение когда напуган
+                    MoveRandomly(ghost);
+                }
+                else
+                {
+                    // Преследование
+                    ghost.ScatterTicks++;
+                    if (ghost.ScatterTicks % 200 < 50)
+                    {
+                        MoveRandomly(ghost); // Периодически разбредаются
+                    }
+                    else
+                    {
+                        MoveTowardsTarget(ghost, pacmanPos);
+                    }
+                }
+
+                Canvas.SetLeft(ghost.Element!, ghost.Position.X * CellSize + 1);
+                Canvas.SetTop(ghost.Element!, ghost.Position.Y * CellSize + 1);
+                Canvas.SetLeft(ghost.Eyes!, ghost.Position.X * CellSize + CellSize / 2 - 3);
+                Canvas.SetTop(ghost.Eyes!, ghost.Position.Y * CellSize + 4);
+            }
+        }
+
+        private void MoveTowardsTarget(Ghost ghost, Point target)
+        {
+            var possibleDirs = GetPossibleDirections(ghost);
+            if (possibleDirs.Count == 0) return;
+
+            Direction bestDir = possibleDirs[0];
+            double bestDist = double.MaxValue;
+
+            foreach (var dir in possibleDirs)
+            {
+                Point nextPos = GetNextPosition(ghost.Position, dir);
+                double dist = Distance(nextPos, target);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestDir = dir;
+                }
+            }
+
+            ghost.Direction = bestDir;
+            ghost.Position = GetNextPosition(ghost.Position, bestDir);
+            
+            // Туннель для призраков
+            if (ghost.Position.X < 0) ghost.Position = new Point(MapWidth - 1, ghost.Position.Y);
+            else if (ghost.Position.X >= MapWidth) ghost.Position = new Point(0, ghost.Position.Y);
+        }
+
+        private void MoveRandomly(Ghost ghost)
+        {
+            var possibleDirs = GetPossibleDirections(ghost);
+            if (possibleDirs.Count == 0) return;
+
+            // Предпочитаем текущее направление, если возможно
+            if (possibleDirs.Contains(ghost.Direction) && random.NextDouble() > 0.3)
+            {
+                ghost.Position = GetNextPosition(ghost.Position, ghost.Direction);
+            }
+            else
+            {
+                ghost.Direction = possibleDirs[random.Next(possibleDirs.Count)];
+                ghost.Position = GetNextPosition(ghost.Position, ghost.Direction);
+            }
+            
+            // Туннель
+            if (ghost.Position.X < 0) ghost.Position = new Point(MapWidth - 1, ghost.Position.Y);
+            else if (ghost.Position.X >= MapWidth) ghost.Position = new Point(0, ghost.Position.Y);
+        }
+
+        private List<Direction> GetPossibleDirections(Ghost ghost)
+        {
+            var dirs = new List<Direction>();
+            var opposites = new Dictionary<Direction, Direction>
+            {
+                { Direction.Up, Direction.Down },
+                { Direction.Down, Direction.Up },
+                { Direction.Left, Direction.Right },
+                { Direction.Right, Direction.Left }
+            };
+
+            foreach (Direction dir in new[] { Direction.Up, Direction.Down, Direction.Left, Direction.Right })
+            {
+                // Не разворачиваемся на 180°
+                if (opposites.TryGetValue(ghost.Direction, out var opposite) && dir == opposite)
+                    continue;
+
+                Point next = GetNextPosition(ghost.Position, dir);
+                if (CanMoveGhost(next))
+                {
+                    dirs.Add(dir);
+                }
+            }
+
+            // Если нет вариантов — разворот
+            if (dirs.Count == 0 && opposites.TryGetValue(ghost.Direction, out var opp))
+            {
+                Point back = GetNextPosition(ghost.Position, opp);
+                if (CanMoveGhost(back))
+                    dirs.Add(opp);
+            }
+
+            return dirs;
+        }
+        #endregion
+
+        #region Collision Detection
+        private void CheckCollisions()
+        {
+            foreach (var ghost in ghosts)
+            {
+                if (ghost.Position == pacmanPos || 
+                    (Math.Abs(ghost.Position.X - pacmanPos.X) < 0.5 && 
+                     Math.Abs(ghost.Position.Y - pacmanPos.Y) < 0.5))
+                {
+                    if (ghost.IsScared && !ghost.IsEaten)
+                    {
+                        // Съедаем призрака
+                        EatGhost(ghost);
+                    }
+                    else if (!ghost.IsEaten)
+                    {
+                        // Pac-Man умирает
+                        Die();
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void EatGhost(Ghost ghost)
+        {
+            ghost.IsEaten = true;
+            ghost.Element!.Fill = Brushes.Transparent;
+            ghost.Eyes!.Fill = Brushes.Blue;
+            
+            score += 200 * (int)Math.Pow(2, ghosts.FindAll(g => g.IsEaten).Count - 1);
+            UpdateUI();
+        }
+
+        private void CollectDot()
+        {
+            int x = (int)pacmanPos.X;
+            int y = (int)pacmanPos.Y;
+            
+            if (map[y, x] == 2) // Обычная точка
+            {
+                map[y, x] = 0;
+                score += 10;
+                dotsCollected++;
+                RemoveDotAt(x, y);
+                UpdateUI();
+                CheckWin();
+            }
+            else if (map[y, x] == 3) // Power pellet
+            {
+                map[y, x] = 0;
+                score += 50;
+                dotsCollected++;
+                RemoveDotAt(x, y);
+                UpdateUI();
+                StartPowerMode();
+                CheckWin();
+            }
+        }
+
+        private void RemoveDotAt(int x, int y)
+        {
+            double centerX = x * CellSize + CellSize / 2;
+            double centerY = y * CellSize + CellSize / 2;
+
+            for (int i = dotElements.Count - 1; i >= 0; i--)
+            {
+                var dot = dotElements[i];
+                double dotCenterX = Canvas.GetLeft(dot) + dot.Width / 2;
+                double dotCenterY = Canvas.GetTop(dot) + dot.Height / 2;
+
+                if (Math.Abs(dotCenterX - centerX) < CellSize / 2 && 
+                    Math.Abs(dotCenterY - centerY) < CellSize / 2)
+                {
+                    GameCanvas.Children.Remove(dot);
+                    dotElements.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+        #endregion
+
+        #region Power Mode
+        private void StartPowerMode()
+        {
+            powerMode = true;
+            powerModeTicks = PowerModeDuration;
+
+            foreach (var ghost in ghosts)
+            {
+                if (!ghost.IsEaten)
+                {
+                    ghost.IsScared = true;
+                    ghost.Element!.Fill = Brushes.Blue;
+                }
+            }
+        }
+
+        private void EndPowerMode()
+        {
+            powerMode = false;
+            foreach (var ghost in ghosts)
+            {
+                ghost.IsScared = false;
+                if (!ghost.IsEaten)
+                {
+                    ghost.Element!.Fill = new SolidColorBrush(ghost.NormalColor);
+                }
+            }
+        }
+        #endregion
+
+        #region Life & Death
+        private void Die()
+        {
+            gameTimer.Stop();
+            animationTimer.Stop();
+            gameState = GameState.Dying;
+            
+            lives--;
+            
+            if (lives <= 0)
+            {
+                lives = 0;
+                GameOver();
+            }
+            else
+            {
+                UpdateLivesDisplay();
+                StatusText.Text = "READY!";
+                
+                // Небольшая задержка перед респавном
+                var respawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+                respawnTimer.Tick += (s, e) =>
+                {
+                    respawnTimer.Stop();
+                    Respawn();
+                };
+                respawnTimer.Start();
+            }
+        }
+
+        private void Respawn()
+        {
+            pacmanPos = pacmanStartPos;
+            pacmanDir = Direction.None;
+            nextDir = Direction.None;
+            
+            Canvas.SetLeft(pacmanElement!, pacmanPos.X * CellSize);
+            Canvas.SetTop(pacmanElement!, pacmanPos.Y * CellSize);
+            
+            // Сброс призраков
+            foreach (var ghost in ghosts)
+            {
+                ghost.Position = ghost.StartPosition;
+                ghost.Direction = Direction.Up;
+                ghost.IsScared = false;
+                ghost.IsEaten = false;
+                ghost.Element!.Fill = new SolidColorBrush(ghost.NormalColor);
+                ghost.Eyes!.Fill = Brushes.White;
+                
+                Canvas.SetLeft(ghost.Element, ghost.Position.X * CellSize + 1);
+                Canvas.SetTop(ghost.Element, ghost.Position.Y * CellSize + 1);
+            }
+            
+            EndPowerMode();
+            
+            gameState = GameState.Playing;
+            StatusText.Text = "";
+            gameTimer.Start();
+            animationTimer.Start();
+            this.Focus();
+        }
+
+        private void GameOver()
+        {
+            gameState = GameState.GameOver;
+            UpdateLivesDisplay();
+            StatusText.Text = "GAME OVER";
+            
+            if (score > highScore)
+            {
+                highScore = score;
+                HighScoreText.Text = highScore.ToString();
+            }
+            
+            MessageBox.Show($"GAME OVER\n\nScore: {score}\nHigh Score: {highScore}", 
+                "Pac-Man", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void CheckWin()
+        {
+            if (dotsCollected >= totalDots)
+            {
+                gameTimer.Stop();
+                animationTimer.Stop();
+                gameState = GameState.Win;
+                
+                level++;
+                LevelText.Text = level.ToString();
+                
+                MessageBox.Show($"LEVEL {level - 1} COMPLETE!\n\nScore: {score}", 
+                    "Pac-Man", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                // Следующий уровень
+                NextLevel();
+            }
+        }
+
+        private void NextLevel()
+        {
+            // Восстанавливаем карту
+            GameCanvas.Children.Clear();
+            dotElements.Clear();
+            ghosts.Clear();
+            dotsCollected = 0;
+            powerMode = false;
+            
+            CreateMap();
+            DrawMap();
+            SpawnPacman();
+            SpawnGhosts();
+            
+            // Увеличиваем сложность
+            int newInterval = Math.Max(60, 120 - level * 10);
+            gameTimer.Interval = TimeSpan.FromMilliseconds(newInterval);
+            
+            gameState = GameState.Playing;
+            StatusText.Text = "";
+            gameTimer.Start();
+            animationTimer.Start();
+            this.Focus();
+        }
+        #endregion
+
+        #region Input
         private void Page_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -264,52 +812,65 @@ namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
                     nextDir = Direction.Right;
                     break;
                 case Key.Space:
-                    Start_Click(sender, e);
+                    HandleSpace();
+                    break;
+                case Key.Escape:
+                    if (gameState == GameState.Playing)
+                        PauseGame();
+                    break;
+                case Key.R:
+                    InitGame();
                     break;
             }
             e.Handled = true;
         }
 
-        /// <summary>
-        /// Игровой цикл
-        /// </summary>
-        private void GameLoop(object? sender, EventArgs e)
+        private void HandleSpace()
         {
-            // Power-up таймер
-            if (isPoweredUp)
+            switch (gameState)
             {
-                powerUpTicks--;
-                if (powerUpTicks <= 0)
-                {
-                    isPoweredUp = false;
-                    foreach (var ghost in ghostElements)
-                        ghost.Fill = new SolidColorBrush(ghostColors[ghostElements.IndexOf(ghost)]);
-                }
-            }
-            
-            // Пробуем применить следующее направление
-            if (nextDir != Direction.None && CanMove(GetNextPos(pacmanPos, nextDir)))
-            {
-                pacmanDir = nextDir;
-            }
-            
-            // Двигаем Pac-Man
-            if (pacmanDir != Direction.None)
-            {
-                Point nextPos = GetNextPos(pacmanPos, pacmanDir);
-                if (CanMove(nextPos))
-                {
-                    pacmanPos = nextPos;
-                    Canvas.SetLeft(pacmanElement, pacmanPos.X * CellSize + 2);
-                    Canvas.SetTop(pacmanElement, pacmanPos.Y * CellSize + 2);
-                    
-                    CheckDotCollision();
-                    CheckGhostCollision();
-                }
+                case GameState.Ready:
+                    StartGame();
+                    break;
+                case GameState.Playing:
+                    PauseGame();
+                    break;
+                case GameState.Paused:
+                    ResumeGame();
+                    break;
+                case GameState.GameOver:
+                    InitGame();
+                    break;
             }
         }
 
-        private Point GetNextPos(Point pos, Direction dir)
+        private void StartGame()
+        {
+            gameState = GameState.Playing;
+            StatusText.Text = "";
+            gameTimer.Start();
+            animationTimer.Start();
+        }
+
+        private void PauseGame()
+        {
+            gameState = GameState.Paused;
+            gameTimer.Stop();
+            animationTimer.Stop();
+            StatusText.Text = "PAUSED";
+        }
+
+        private void ResumeGame()
+        {
+            gameState = GameState.Playing;
+            StatusText.Text = "";
+            gameTimer.Start();
+            animationTimer.Start();
+        }
+        #endregion
+
+        #region Helpers
+        private Point GetNextPosition(Point pos, Direction dir)
         {
             return dir switch
             {
@@ -325,230 +886,57 @@ namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
         {
             int x = (int)pos.X;
             int y = (int)pos.Y;
-            return x >= 0 && y >= 0 && x < mapWidth && y < mapHeight && map[y, x] != 1;
-        }
-
-        private void CheckDotCollision()
-        {
-            int x = (int)pacmanPos.X;
-            int y = (int)pacmanPos.Y;
             
-            if (map[y, x] == 2)
-            {
-                map[y, x] = 0;
-                score += 10;
-                collectedDots++;
-                RemoveDotAt(x, y);
-                ScoreText.Text = score.ToString();
-                
-                if (collectedDots >= totalDots)
-                {
-                    Win();
-                }
-            }
-            else if (map[y, x] == 3)
-            {
-                map[y, x] = 0;
-                score += 50;
-                RemoveDotAt(x, y);
-                ScoreText.Text = score.ToString();
-                
-                // Активируем power-up
-                isPoweredUp = true;
-                powerUpTicks = 50;
-                foreach (var ghost in ghostElements)
-                    ghost.Fill = Brushes.Blue;
-            }
-        }
-
-        private void RemoveDotAt(int x, int y)
-        {
-            double dotX = x * CellSize + CellSize / 2;
-            double dotY = y * CellSize + CellSize / 2;
+            // Туннель
+            if (x < 0 || x >= MapWidth) return true;
+            if (y < 0 || y >= MapHeight) return false;
             
-            for (int i = dotElements.Count - 1; i >= 0; i--)
-            {
-                double dx = Canvas.GetLeft(dotElements[i]) + dotElements[i].Width / 2;
-                double dy = Canvas.GetTop(dotElements[i]) + dotElements[i].Height / 2;
-                
-                if (Math.Abs(dx - dotX) < CellSize && Math.Abs(dy - dotY) < CellSize)
-                {
-                    GameCanvas.Children.Remove(dotElements[i]);
-                    dotElements.RemoveAt(i);
-                    break;
-                }
-            }
+            int cell = map[y, x];
+            return cell != 1 && cell != 4; // Не стена и не дом призраков
         }
 
-        private void CheckGhostCollision()
+        private bool CanMoveGhost(Point pos)
         {
-            for (int i = 0; i < ghostPositions.Count; i++)
-            {
-                if (ghostPositions[i] == pacmanPos)
-                {
-                    if (isPoweredUp)
-                    {
-                        // Съедаем призрака
-                        score += 200;
-                        ScoreText.Text = score.ToString();
-                        ghostPositions[i] = new Point(9, 7);
-                        Canvas.SetLeft(ghostElements[i], 9 * CellSize + 2);
-                        Canvas.SetTop(ghostElements[i], 7 * CellSize + 2);
-                    }
-                    else
-                    {
-                        LoseLife();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Движение призраков (простой ИИ с BFS)
-        /// </summary>
-        private void MoveGhosts(object? sender, EventArgs e)
-        {
-            for (int i = 0; i < ghostPositions.Count; i++)
-            {
-                Point ghostPos = ghostPositions[i];
-                Point target = isPoweredUp 
-                    ? new Point(random.Next(mapWidth), random.Next(mapHeight)) // Убегают
-                    : pacmanPos; // Преследуют
-                
-                // Простой BFS для первого шага
-                var path = FindPathBFS(ghostPos, target);
-                if (path != null && path.Count > 1)
-                {
-                    ghostPositions[i] = path[1];
-                }
-                else
-                {
-                    // Случайное движение если путь не найден
-                    var dirs = new[] { Direction.Up, Direction.Down, Direction.Left, Direction.Right };
-                    foreach (var dir in dirs)
-                    {
-                        var next = GetNextPos(ghostPos, dir);
-                        if (CanMove(next))
-                        {
-                            ghostPositions[i] = next;
-                            break;
-                        }
-                    }
-                }
-                
-                Canvas.SetLeft(ghostElements[i], ghostPositions[i].X * CellSize + 2);
-                Canvas.SetTop(ghostElements[i], ghostPositions[i].Y * CellSize + 2);
-            }
+            int x = (int)pos.X;
+            int y = (int)pos.Y;
             
-            CheckGhostCollision();
+            if (x < 0 || x >= MapWidth) return true;
+            if (y < 0 || y >= MapHeight) return false;
+            
+            return map[y, x] != 1; // Только не стена
         }
 
-        private List<Point>? FindPathBFS(Point start, Point end)
+        private double Distance(Point a, Point b)
         {
-            var queue = new Queue<Point>();
-            var cameFrom = new Dictionary<Point, Point>();
-            
-            queue.Enqueue(start);
-            cameFrom[start] = start;
-            
-            int[] dx = { 0, 0, -1, 1 };
-            int[] dy = { -1, 1, 0, 0 };
-            
-            while (queue.Count > 0)
+            return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+        }
+
+        private void UpdateUI()
+        {
+            ScoreText.Text = score.ToString();
+            if (score > highScore)
             {
-                var current = queue.Dequeue();
-                
-                if (current == end)
+                highScore = score;
+                HighScoreText.Text = highScore.ToString();
+            }
+        }
+
+        private void UpdateLivesDisplay()
+        {
+            LivesPanel.Children.Clear();
+            int displayLives = Math.Max(0, lives);
+            for (int i = 0; i < displayLives; i++)
+            {
+                var lifeIcon = new Ellipse
                 {
-                    var path = new List<Point>();
-                    var c = end;
-                    while (cameFrom[c] != c)
-                    {
-                        path.Add(c);
-                        c = cameFrom[c];
-                    }
-                    path.Add(c);
-                    path.Reverse();
-                    return path;
-                }
-                
-                for (int i = 0; i < 4; i++)
-                {
-                    var next = new Point(current.X + dx[i], current.Y + dy[i]);
-                    if (CanMove(next) && !cameFrom.ContainsKey(next))
-                    {
-                        queue.Enqueue(next);
-                        cameFrom[next] = current;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private void LoseLife()
-        {
-            lives--;
-            LivesText.Text = new string('❤', lives);
-            
-            if (lives <= 0)
-            {
-                GameOver();
-            }
-            else
-            {
-                // Респавн
-                pacmanPos = new Point(9, 7);
-                pacmanDir = Direction.None;
-                nextDir = Direction.None;
-                Canvas.SetLeft(pacmanElement, 9 * CellSize + 2);
-                Canvas.SetTop(pacmanElement, 7 * CellSize + 2);
+                    Width = 16,
+                    Height = 16,
+                    Fill = Brushes.Yellow,
+                    Margin = new Thickness(2, 0, 2, 0)
+                };
+                LivesPanel.Children.Add(lifeIcon);
             }
         }
-
-        private void GameOver()
-        {
-            gameTimer.Stop();
-            ghostTimer.Stop();
-            isRunning = false;
-            StatusText.Text = "GAME OVER";
-            StartButton.Content = "▶ СТАРТ";
-            MessageBox.Show($"Игра окончена!\n\nСчёт: {score}", "Game Over", MessageBoxButton.OK);
-        }
-
-        private void Win()
-        {
-            gameTimer.Stop();
-            ghostTimer.Stop();
-            isRunning = false;
-            StatusText.Text = "🎉 ПОБЕДА!";
-            StartButton.Content = "▶ СТАРТ";
-            MessageBox.Show($"Поздравляем! Вы выиграли!\n\nСчёт: {score}", "Победа!", MessageBoxButton.OK);
-        }
-
-        private void Start_Click(object sender, RoutedEventArgs e)
-        {
-            if (isRunning)
-            {
-                gameTimer.Stop();
-                ghostTimer.Stop();
-                StartButton.Content = "▶ СТАРТ";
-                StatusText.Text = "Пауза";
-            }
-            else
-            {
-                gameTimer.Start();
-                ghostTimer.Start();
-                StartButton.Content = "⏸ ПАУЗА";
-                StatusText.Text = "Собирайте точки!";
-            }
-            isRunning = !isRunning;
-            this.Focus();
-        }
-
-        private void Reset_Click(object sender, RoutedEventArgs e)
-        {
-            InitGame();
-            this.Focus();
-        }
+        #endregion
     }
 }

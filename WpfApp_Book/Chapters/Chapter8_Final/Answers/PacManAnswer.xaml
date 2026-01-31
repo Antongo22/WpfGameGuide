@@ -11,29 +11,41 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- Заголовок -->
-        <Border Grid.Row="0" Background="#1a1a1a" Padding="15">
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" Background="#000" Padding="20,15">
             <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🎮 PAC-MAN" FontSize="24" FontWeight="Bold" Foreground="#F1C40F"/>
-                    <TextBlock Text=" — Финальное задание" FontSize="16" Foreground="#666" VerticalAlignment="Bottom" Margin="10,0,0,3"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Счёт -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="1UP" Foreground="White" FontSize="14" FontWeight="Bold" FontFamily="Consolas"/>
+                    <TextBlock x:Name="ScoreText" Text="0" Foreground="White" FontSize="20" FontWeight="Bold" FontFamily="Consolas"/>
                 </StackPanel>
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock Text="ОЧКИ: " Foreground="#95A5A6" FontSize="14" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ScoreText" Text="0" Foreground="#F1C40F" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <TextBlock Text="   ЖИЗНИ: " Foreground="#95A5A6" FontSize="14" VerticalAlignment="Center" Margin="20,0,0,0"/>
-                    <TextBlock x:Name="LivesText" Text="❤❤❤" Foreground="#E74C3C" FontSize="18" VerticalAlignment="Center"/>
+                
+                <!-- Заголовок -->
+                <TextBlock Grid.Column="1" Text="PAC-MAN" FontSize="28" FontWeight="Bold" 
+                           Foreground="#FFFF00" FontFamily="Impact" VerticalAlignment="Center"/>
+                
+                <!-- Рекорд -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                    <TextBlock Text="HIGH SCORE" Foreground="White" FontSize="14" FontWeight="Bold" FontFamily="Consolas"/>
+                    <TextBlock x:Name="HighScoreText" Text="0" Foreground="White" FontSize="20" 
+                               FontWeight="Bold" FontFamily="Consolas" HorizontalAlignment="Right"/>
                 </StackPanel>
             </Grid>
         </Border>
         
         <!-- Игровое поле -->
-        <Border Grid.Row="1" Background="#000" Margin="10">
-            <Canvas x:Name="GameCanvas" Background="#000" ClipToBounds="True"/>
+        <Border Grid.Row="1" Background="#000" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Canvas x:Name="GameCanvas" Width="532" Height="588" Background="#000000" ClipToBounds="True"/>
         </Border>
         
-        <!-- Панель управления -->
-        <Border Grid.Row="2" Background="#1a1a1a" Padding="12">
+        <!-- Нижняя панель -->
+        <Border Grid.Row="2" Background="#000" Padding="20,15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -41,21 +53,22 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <Button x:Name="StartButton" Content="▶ СТАРТ" Width="100" Height="35" 
-                            Background="#27AE60" Foreground="White" FontWeight="Bold"
-                            Margin="0,0,10,0" Click="Start_Click"/>
-                    <Button Content="↻ ЗАНОВО" Width="100" Height="35" 
-                            Background="#E74C3C" Foreground="White" FontWeight="Bold"
-                            Click="Reset_Click"/>
+                <!-- Жизни -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="LIVES: " Foreground="White" FontSize="14" FontFamily="Consolas" VerticalAlignment="Center"/>
+                    <StackPanel x:Name="LivesPanel" Orientation="Horizontal"/>
                 </StackPanel>
                 
-                <TextBlock Grid.Column="1" x:Name="StatusText" Text="Нажмите СТАРТ!" 
-                           Foreground="#F1C40F" FontSize="16" FontWeight="Bold"
+                <!-- Статус -->
+                <TextBlock Grid.Column="1" x:Name="StatusText" Text="PRESS SPACE TO START" 
+                           Foreground="#FFFF00" FontSize="16" FontWeight="Bold" FontFamily="Consolas"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 
-                <TextBlock Grid.Column="2" Text="↑↓←→ или WASD" 
-                           Foreground="#666" VerticalAlignment="Center"/>
+                <!-- Уровень -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="LEVEL: " Foreground="White" FontSize="14" FontFamily="Consolas"/>
+                    <TextBlock x:Name="LevelText" Text="1" Foreground="#00FFFF" FontSize="14" FontWeight="Bold" FontFamily="Consolas"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
