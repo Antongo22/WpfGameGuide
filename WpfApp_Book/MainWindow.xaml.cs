@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace WpfApp_Book
+namespace WpfGameGuide
 {
     /// <summary>
     /// Главное окно приложения - Учебник WPF

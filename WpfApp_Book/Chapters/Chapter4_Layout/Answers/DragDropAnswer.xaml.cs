@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace WpfApp_Book.Chapters.Chapter4_Layout.Answers
+namespace WpfGameGuide.Chapters.Chapter4_Layout.Answers
 {
     /// <summary>
     /// Drag-Drop редактор - решение задания Главы 4

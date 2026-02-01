@@ -2,7 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfApp_Book.Chapters.Chapter1_Introduction.Answers
+namespace WpfGameGuide.Chapters.Chapter1_Introduction.Answers
 {
     /// <summary>
     /// Калькулятор - решение задания Главы 1

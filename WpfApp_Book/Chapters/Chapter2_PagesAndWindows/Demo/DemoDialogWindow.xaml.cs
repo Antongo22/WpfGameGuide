@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Demo
+namespace WpfGameGuide.Chapters.Chapter2_PagesAndWindows.Demo
 {
     public partial class DemoDialogWindow : Window
     {

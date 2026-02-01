@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Demo
+namespace WpfGameGuide.Chapters.Chapter2_PagesAndWindows.Demo
 {
     public partial class PagesAndWindowsPage : Page
     {

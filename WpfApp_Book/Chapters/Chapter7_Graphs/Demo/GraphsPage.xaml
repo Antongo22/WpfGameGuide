@@ -1,4 +1,4 @@
-<Page x:Class="WpfApp_Book.Chapters.Chapter7_Graphs.Demo.GraphsPage"
+<Page x:Class="WpfGameGuide.Chapters.Chapter7_Graphs.Demo.GraphsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Глава 7: Графы" Focusable="True" Loaded="Page_Loaded" KeyDown="Page_KeyDown">

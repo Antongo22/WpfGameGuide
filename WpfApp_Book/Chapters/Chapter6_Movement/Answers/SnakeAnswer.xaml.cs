@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter6_Movement.Answers
+namespace WpfGameGuide.Chapters.Chapter6_Movement.Answers
 {
     /// <summary>
     /// Змейка - решение задания Главы 6

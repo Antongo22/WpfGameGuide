@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace WpfApp_Book.Chapters.Chapter3_Keyboard.Demo
+namespace WpfGameGuide.Chapters.Chapter3_Keyboard.Demo
 {
     public partial class KeyboardPage : Page
     {

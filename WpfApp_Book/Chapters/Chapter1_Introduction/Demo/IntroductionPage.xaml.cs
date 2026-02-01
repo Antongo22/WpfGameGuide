@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfApp_Book.Chapters.Chapter1_Introduction.Demo
+namespace WpfGameGuide.Chapters.Chapter1_Introduction.Demo
 {
     public partial class IntroductionPage : Page
     {

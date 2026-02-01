@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace WpfApp_Book.Chapters.Chapter4_Layout.Demo
+namespace WpfGameGuide.Chapters.Chapter4_Layout.Demo
 {
     public partial class LayoutPage : Page
     {

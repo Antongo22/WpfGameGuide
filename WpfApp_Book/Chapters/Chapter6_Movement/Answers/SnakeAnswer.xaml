@@ -1,4 +1,4 @@
-<Page x:Class="WpfApp_Book.Chapters.Chapter6_Movement.Answers.SnakeAnswer"
+<Page x:Class="WpfGameGuide.Chapters.Chapter6_Movement.Answers.SnakeAnswer"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Ответ: Змейка" 

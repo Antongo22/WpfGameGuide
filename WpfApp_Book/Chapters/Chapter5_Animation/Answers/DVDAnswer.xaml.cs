@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter5_Animation.Answers
+namespace WpfGameGuide.Chapters.Chapter5_Animation.Answers
 {
     /// <summary>
     /// DVD-заставка - решение задания Главы 5

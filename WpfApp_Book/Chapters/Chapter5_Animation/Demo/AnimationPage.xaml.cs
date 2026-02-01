@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter5_Animation.Demo
+namespace WpfGameGuide.Chapters.Chapter5_Animation.Demo
 {
     public partial class AnimationPage : Page
     {

@@ -1,4 +1,4 @@
-<Page x:Class="WpfApp_Book.Chapters.Chapter7_Graphs.Answers.MazeAnswer"
+<Page x:Class="WpfGameGuide.Chapters.Chapter7_Graphs.Answers.MazeAnswer"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Ответ: Лабиринт"

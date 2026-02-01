@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter8_Final.Answers
+namespace WpfGameGuide.Chapters.Chapter8_Final.Answers
 {
     public partial class PacManAnswer : Page
     {

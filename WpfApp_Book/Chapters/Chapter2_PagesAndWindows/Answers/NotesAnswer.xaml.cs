@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfApp_Book.Chapters.Chapter2_PagesAndWindows.Answers
+namespace WpfGameGuide.Chapters.Chapter2_PagesAndWindows.Answers
 {
     /// <summary>
     /// Приложение для заметок - решение задания Главы 2

@@ -1,4 +1,4 @@
-<Page x:Class="WpfApp_Book.Chapters.Chapter3_Keyboard.Demo.KeyboardPage"
+<Page x:Class="WpfGameGuide.Chapters.Chapter3_Keyboard.Demo.KeyboardPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Глава 3: Клавиатура" Focusable="True" Loaded="Page_Loaded" KeyDown="Page_KeyDown">

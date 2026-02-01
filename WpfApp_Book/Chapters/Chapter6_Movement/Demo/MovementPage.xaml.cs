@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter6_Movement.Demo
+namespace WpfGameGuide.Chapters.Chapter6_Movement.Demo
 {
     public partial class MovementPage : Page
     {

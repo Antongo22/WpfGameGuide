@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace WpfApp_Book.Chapters.Chapter7_Graphs.Demo
+namespace WpfGameGuide.Chapters.Chapter7_Graphs.Demo
 {
     public partial class GraphsPage : Page
     {

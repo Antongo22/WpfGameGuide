@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace WpfApp_Book.Chapters.Chapter3_Keyboard.Answers
+namespace WpfGameGuide.Chapters.Chapter3_Keyboard.Answers
 {
     /// <summary>
     /// Игра "Нажми клавишу" - решение задания Главы 3

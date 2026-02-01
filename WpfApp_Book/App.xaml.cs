@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace WpfApp_Book
+namespace WpfGameGuide
 {
     /// <summary>
     /// Interaction logic for App.xaml
