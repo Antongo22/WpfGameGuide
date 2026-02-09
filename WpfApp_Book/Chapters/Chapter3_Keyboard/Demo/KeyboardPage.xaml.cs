@@ -1,11 +1,15 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace WpfGameGuide.Chapters.Chapter3_Keyboard.Demo
 {
     public partial class KeyboardPage : Page
     {
+        private DispatcherTimer? timer;
+        private int secondsElapsed = 0;
+
         public KeyboardPage()
         {
             InitializeComponent();
@@ -53,6 +57,51 @@ namespace WpfGameGuide.Chapters.Chapter3_Keyboard.Demo
             
             // Предотвращаем дальнейшую обработку
             e.Handled = true;
+        }
+
+        private void StartTimer_Click(object sender, RoutedEventArgs e)
+        {
+            if (timer == null || !timer.IsEnabled)
+            {
+                timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(1); // Каждую секунду
+                timer.Tick += Timer_Tick;
+                timer.Start();
+                TimerStatus.Text = "Таймер запущен";
+            }
+        }
+
+        private void StopTimer_Click(object sender, RoutedEventArgs e)
+        {
+            if (timer != null && timer.IsEnabled)
+            {
+                timer.Stop();
+                TimerStatus.Text = "Таймер остановлен";
+            }
+        }
+
+        private void ResetTimer_Click(object sender, RoutedEventArgs e)
+        {
+            if (timer != null)
+            {
+                timer.Stop();
+            }
+            secondsElapsed = 0;
+            UpdateTimerDisplay();
+            TimerStatus.Text = "Таймер сброшен";
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            secondsElapsed++;
+            UpdateTimerDisplay();
+        }
+
+        private void UpdateTimerDisplay()
+        {
+            int minutes = secondsElapsed / 60;
+            int seconds = secondsElapsed % 60;
+            TimerDisplay.Text = $"{minutes:D2}:{seconds:D2}";
         }
     }
 }

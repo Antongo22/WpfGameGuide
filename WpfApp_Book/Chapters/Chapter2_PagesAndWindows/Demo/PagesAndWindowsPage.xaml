@@ -278,6 +278,111 @@ string result = dialog.ResultValue;
                 </StackPanel>
             </Border>
 
+            <!-- ===== ТЕОРИЯ: ListBox ===== -->
+            <Border Background="#D5F5E3" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="📋 ListBox — список элементов" FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,10" FontSize="13">
+ListBox — элемент для отображения списка элементов с возможностью выбора одного или нескольких элементов.
+                    </TextBlock>
+                    
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <TextBlock FontFamily="Consolas" Foreground="White" xml:space="preserve" FontSize="12">
+&lt;!-- XAML: создание ListBox --&gt;
+&lt;ListBox x:Name="MyListBox" 
+         Height="150" 
+         SelectionChanged="MyListBox_SelectionChanged"&gt;
+    &lt;ListBoxItem Content="Элемент 1"/&gt;
+    &lt;ListBoxItem Content="Элемент 2"/&gt;
+    &lt;ListBoxItem Content="Элемент 3"/&gt;
+&lt;/ListBox&gt;
+
+// C#: работа с ListBox
+// Добавление элемента
+MyListBox.Items.Add("Новый элемент");
+
+// Получение выбранного элемента
+object selected = MyListBox.SelectedItem;
+string selectedText = MyListBox.SelectedItem?.ToString();
+
+// Удаление выбранного элемента
+if (MyListBox.SelectedItem != null)
+{
+    MyListBox.Items.Remove(MyListBox.SelectedItem);
+}
+
+// Очистка всего списка
+MyListBox.Items.Clear();
+
+// Обработчик выбора
+private void MyListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+{
+    if (MyListBox.SelectedItem != null)
+    {
+        MessageBox.Show($"Выбран: {MyListBox.SelectedItem}");
+    }
+}
+                        </TextBlock>
+                    </Border>
+                    
+                    <TextBlock Text="Основные свойства:" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                    <Border Background="White" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Items" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Коллекция элементов списка"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="SelectedItem" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Выбранный элемент (или null)"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="SelectedIndex" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Индекс выбранного элемента (-1 если ничего не выбрано)"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="SelectionMode" FontWeight="Bold" Margin="0,0,15,0" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Single (один) или Multiple (несколько)"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Демонстрация ListBox -->
+                    <TextBlock Text="Демонстрация:" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                    <Border Background="White" CornerRadius="8" Padding="15" BorderBrush="#27AE60" BorderThickness="2">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="ListBoxInput" Grid.Column="0" Margin="0,0,10,0" 
+                                         Text="Новая заметка" VerticalContentAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Content="Добавить" Padding="10,5" Margin="0,0,5,0" 
+                                            Click="AddToListBox_Click" Background="#27AE60" Foreground="White"/>
+                                    <Button Content="Удалить" Padding="10,5" 
+                                            Click="RemoveFromListBox_Click" Background="#E74C3C" Foreground="White"/>
+                                </StackPanel>
+                            </Grid>
+                            <ListBox x:Name="DemoListBox" Height="120" SelectionChanged="DemoListBox_SelectionChanged">
+                                <ListBoxItem Content="Заметка 1"/>
+                                <ListBoxItem Content="Заметка 2"/>
+                                <ListBoxItem Content="Заметка 3"/>
+                            </ListBox>
+                            <TextBlock x:Name="ListBoxStatus" Text="Выберите элемент из списка" 
+                                       Margin="0,10,0,0" FontStyle="Italic" Foreground="#666"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- ===== ПРАКТИЧЕСКОЕ ЗАДАНИЕ ===== -->
             <Border Background="#FADBD8" CornerRadius="8" Padding="15" BorderBrush="#E74C3C" BorderThickness="2">
                 <StackPanel>
