@@ -70,5 +70,20 @@ namespace WpfGameGuide.Chapters.Chapter1_Introduction.Demo
                 RadioStatus.Text = $"Выбрано: {size}, {color}";
             }
         }
+
+        // ===== COMBOBOX =====
+        private void DemoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DemoComboBox.SelectedItem != null && ComboBoxStatus != null)
+            {
+                ComboBoxItem selectedItem = DemoComboBox.SelectedItem as ComboBoxItem;
+                if (selectedItem != null)
+                {
+                    string selectedText = selectedItem.Content?.ToString() ?? "Неизвестно";
+                    int selectedIndex = DemoComboBox.SelectedIndex;
+                    ComboBoxStatus.Text = $"Выбрано: {selectedText} (индекс: {selectedIndex})";
+                }
+            }
+        }
     }
 }

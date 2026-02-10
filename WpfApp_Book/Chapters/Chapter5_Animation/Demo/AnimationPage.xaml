@@ -261,6 +261,99 @@ private void Page_Unloaded(object sender, RoutedEventArgs e)
                 </StackPanel>
             </Border>
 
+            <!-- Секция 7: Slider для управления скоростью -->
+            <Border Background="#D5F5E3" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🎚️ Slider (Ползунок) — управление параметрами" FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,10" FontSize="13">
+Slider — элемент для выбора числового значения в заданном диапазоне. Идеален для управления скоростью, громкостью, размером и другими параметрами в реальном времени.
+                    </TextBlock>
+                    
+                    <Border Background="#2C3E50" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <TextBlock FontFamily="Consolas" Foreground="White" xml:space="preserve" FontSize="12">
+&lt;!-- XAML: создание Slider --&gt;
+&lt;Slider x:Name="SpeedSlider"
+        Minimum="1"              // Минимальное значение
+        Maximum="20"              // Максимальное значение
+        Value="5"                 // Текущее значение
+        TickFrequency="1"         // Шаг делений
+        IsSnapToTickEnabled="True"  // Привязка к делениям
+        ValueChanged="SpeedSlider_ValueChanged"/&gt;
+
+// C#: работа со Slider
+// Получение текущего значения
+double speed = SpeedSlider.Value;
+
+// Установка значения
+SpeedSlider.Value = 10;
+
+// Обработчик изменения значения
+private void SpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs&lt;double&gt; e)
+{
+    double newSpeed = e.NewValue;  // Новое значение
+    double oldSpeed = e.OldValue;  // Старое значение
+    
+    // Применяем новую скорость к анимации
+    velocityX = newSpeed;
+    velocityY = newSpeed;
+    
+    // Обновляем отображение
+    SpeedLabel.Text = $"Скорость: {newSpeed:F1}";
+}
+                        </TextBlock>
+                    </Border>
+                    
+                    <TextBlock Text="Основные свойства:" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                    <Border Background="White" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Minimum" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Минимальное значение (по умолчанию 0)"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Maximum" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Максимальное значение (по умолчанию 10)"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Value" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Текущее значение (double)"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="TickFrequency" FontWeight="Bold" Margin="0,0,15,3" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Интервал между делениями на шкале"/>
+                            
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="IsSnapToTickEnabled" FontWeight="Bold" Margin="0,0,15,0" FontFamily="Consolas"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Привязка значения к делениям (true/false)"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Демонстрация Slider -->
+                    <TextBlock Text="Демонстрация: Управление скоростью" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                    <Border Background="White" CornerRadius="8" Padding="15" BorderBrush="#27AE60" BorderThickness="2">
+                        <StackPanel>
+                            <TextBlock Text="Переместите ползунок для изменения скорости:" Margin="0,0,0,10"/>
+                            <Slider x:Name="DemoSpeedSlider" 
+                                    Minimum="1" Maximum="15" Value="5" 
+                                    TickFrequency="1" IsSnapToTickEnabled="True"
+                                    ValueChanged="DemoSpeedSlider_ValueChanged"/>
+                            <TextBlock x:Name="SliderValueText" Text="Скорость: 5" 
+                                       FontWeight="Bold" HorizontalAlignment="Center" 
+                                       Foreground="#27AE60" Margin="0,10,0,0"/>
+                            <TextBlock Text="💡 В реальном приложении это значение можно использовать для изменения скорости анимации" 
+                                       FontStyle="Italic" Foreground="#666" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- Демонстрация -->
             <Border Background="#2C3E50" CornerRadius="8" Margin="0,0,0,15">
                 <Grid>

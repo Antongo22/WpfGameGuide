@@ -151,5 +151,24 @@ namespace WpfGameGuide.Chapters.Chapter5_Animation.Demo
             string dirY = velocityY > 0 ? "↓" : "↑";
             VelocityText.Text = $"Скорость: {speed:F1} px/кадр ({dirX}{dirY})";
         }
+
+        /// <summary>
+        /// Обработчик изменения значения Slider
+        /// Демонстрирует работу с событием ValueChanged
+        /// </summary>
+        private void DemoSpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            double newSpeed = e.NewValue;
+            
+            // Проверяем, что элемент инициализирован
+            if (SliderValueText != null)
+            {
+                SliderValueText.Text = $"Скорость: {newSpeed:F0}";
+            }
+            
+            // В реальном приложении здесь можно изменить скорость анимации:
+            // velocityX = newSpeed;
+            // velocityY = newSpeed;
+        }
     }
 }
